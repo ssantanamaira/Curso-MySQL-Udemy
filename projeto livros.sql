@@ -397,3 +397,4 @@ select * from tbl_Livros
 
 SELECT * FROM tbl_livros;
 
+# video 31
