@@ -1,4 +1,4 @@
 # Curso MySQL Udemy.
 
-Repositorio de aulas do curso.
+Repositório de aulas do curso.
 
