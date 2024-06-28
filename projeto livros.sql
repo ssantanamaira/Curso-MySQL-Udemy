@@ -397,4 +397,260 @@ select * from tbl_Livros
 
 SELECT * FROM tbl_livros;
 
-# video 31
+ # Especificar Condições de Filtragem em Grupos- HAVING
+ 
+ # Sintaxe:
+ 
+SELECT colunas, função_agregação()
+FROM tabela
+WHERE filtro
+GROUP BY colunas
+HAVING filtro_agrupamento
+ORDER BY coluna;
+
+# HAVING - Exemplo 01: Consulta retornando IDs de editoras cuja soma de preços de livros seja maior que 200 reais
+
+SELECT IdEditora, SUM(PrecoLivro) AS Soma
+FROM tbl_livros
+GROUP BY IdEditora
+HAVING Soma > 200;
+
+#HAVING - Exemplo 02: Consulta retornando IDs de editoras, médias de números
+#de páginas por editora e IDs de categorias, cuja média de nº de páginas seja igual ou maior a 1000 por editora. 
+
+SELECT IdEditora, AVG(NumeroPaginas), IdAssunto
+FROM tbl_livros
+GROUP BY IdEditora, IdAssunto
+HAVING AVG(NumeroPaginas) >= 1000;
+
+# HAVING - Exemplo 02: Retornar IDs de editoras e soma de páginas por editora, com
+# ID de assunto > 3 e soma de páginas >= a 900 por editora.
+
+SELECT IdEditora, SUM(NumeroPaginas) AS
+SomaPaginas FROM tbl_livros
+WHERE IdAssunto > 3
+GROUP BY IdEditora
+HAVING SomaPaginas >= 900
+ORDER BY IdEditora; 
+
+# Consultar dados a partir de duas ou mais tabelas - INNER JOIN
+
+# Sintaxe
+SELECT colunas
+FROM tabela1
+[INNER] JOIN tabela2
+ON tabela1.coluna=tabela2.coluna;
+[INNER] JOIN tabelaN
+ON tabela1.coluna=tabelaN.coluna;
+
+# INNER JOIN - Exemplos
+
+SELECT * FROM tbl_Livros
+INNER JOIN tbl_Editoras
+ON tbl_Livros.IdEditora = tbl_Editoras.IdEditora;
+
+SELECT tbl_Livros.NomeLivro, tbl_Livros.ISBN13,
+tbl_Assuntos.Assunto
+FROM tbl_Livros JOIN tbl_Assuntos
+ON tbl_Livros.IdAssunto = tbl_Assuntos.IdAssunto;
+
+# Usando Aliases e cláusulas WHERE e LIKE:
+
+SELECT L.NomeLivro AS Livros, E.NomeEditora AS
+Editoras
+FROM tbl_Livros AS L
+JOIN tbl_Editoras AS E
+ON L.IdEditora = E.IdEditora
+WHERE E.NomeEditora LIKE 'M%';
+
+# INNER JOIN - com três tabelas
+
+SELECT L.NomeLivro Livro, C.Assunto Assunto,
+E.NomeEditora Editora
+FROM tbl_Livros L
+JOIN tbl_Assuntos C
+ON L.IdAssunto = C.IdAssunto
+JOIN tbl_Editoras E
+ON L.IdEditora = E.IdEditora;
+
+# INNER JOIN - outro com três tabelas
+
+SELECT L.NomeLivro Livro,
+CONCAT(A.NomeAutor, ' ', A.SobrenomeAutor) Autor,
+L.PrecoLivro 'Preço do Livro'
+FROM tbl_livrosautores LA
+JOIN tbl_livros L ON L.IdLivro = LA.IdLivro
+JOIN tbl_Autores A ON A.IdAutor = LA.IdAutor;
+
+# Joins com USING Sintaxe:
+
+SELECT colunas
+FROM tabela1
+JOIN tabela2 USING (coluna_em_comum)
+JOIN tabelaN USING (coluna_em_comum);
+
+SELECT L.NomeLivro AS Livro,
+CONCAT(A.NomeAutor, ' ', A.SobrenomeAutor) AS Autor,
+L.PrecoLivro As 'Preço do Livro'
+FROM tbl_livrosautores LA
+JOIN tbl_Livros L USING(IdLivro)
+JOIN tbl_Autores A USING(IdAutor)
+WHERE L.PrecoLivro BETWEEN 160.00 AND 200.00
+ORDER BY L.NomeLivro;
+
+# NATURAL Joins Sintaxe:
+
+SELECT colunas
+FROM tabela1
+NATURAL JOIN tabela2
+[NATURAL JOIN tabelaN]...;
+
+# Joins com NATURAL
+
+SELECT L.NomeLivro AS Livro,
+CONCAT(A.NomeAutor, ' ', A.SobrenomeAutor) AS Autor,
+L.PrecoLivro As 'Preço do Livro'
+FROM tbl_livrosautores LA
+NATURAL JOIN tbl_Livros L
+NATURAL JOIN tbl_Autores A
+WHERE L.PrecoLivro BETWEEN 160.00 AND 200.00
+ORDER BY L.NomeLivro;
+
+INNER JOIN Implícito Sintaxe:
+
+SELECT colunas
+FROM tabela1, tabela2 [, tabelaN]...
+WHERE tabela1.coluna operador tabela2.coluna
+[AND tabela2.coluna operador tabela3.coluna}...
+
+# INNER JOIN Implícito
+
+SELECT L.NomeLivro AS Livro,
+CONCAT(A.NomeAutor, ' ', A.SobrenomeAutor) AS Autor, L.PrecoLivro As 'Preço do Livro'
+FROM tbl_livrosautores LA, tbl_Livros L, tbl_Autores A
+WHERE L.IdLivro = LA.IdLivro
+AND LA.IdAutor = A.IdAutor
+AND L.PrecoLivro BETWEEN 160.00 AND 200.00
+ORDER BY Livro;
+
+# Consultar dados a partir de duas ou mais tabelas - OUTER JOINS
+
+# LEFT JOIN  (esquerda)- Sintaxe
+
+SELECT colunas
+FROM tabela_esq
+LEFT (OUTER) JOIN tabela_dir
+ON tabela_esq.coluna=tabela_dir.coluna;
+
+# LEFT JOIN - Exemplo
+
+SELECT * FROM tbl_Assuntos
+LEFT JOIN tbl_Livros
+ON tbl_Livros.IdAssunto = tbl_Assuntos.IdAssunto;
+
+# LEFT JOIN - excluir correspondências Sintaxe:
+
+SELECT coluna
+FROM tabela_esq
+LEFT (OUTER) JOIN tabela_dir
+ON tabela_esq.coluna=tabela_dir.coluna
+WHERE tabela_dir.coluna IS NULL;
+
+# LEFT JOIN - excluir correspondências
+# Exemplo - Só os assuntos sem livros cadastrados ainda na tabela de livros:
+
+SELECT * FROM tbl_Assuntos
+LEFT JOIN tbl_Livros
+ON tbl_Livros.IdAssunto = tbl_Assuntos.IdAssunto
+WHERE tbl_Livros.IdAssunto IS NULL;
+
+# RIGHT JOIN  ( direita)  Sintaxe:
+
+SELECT colunas
+FROM tabela_esq
+RIGHT (OUTER) JOIN tabela_dir
+ON tabela_esq.coluna=tabela_dir.coluna;
+
+# RIGHT JOIN - Exemplo:
+
+SELECT * FROM tbl_Livros AS Li
+RIGHT JOIN tbl_Editoras AS Ed
+ON Li.IdEditora = Ed.IdEditora
+
+#RIGHT JOIN - excluir correspondências Sintaxe:
+
+SELECT coluna
+FROM tabela_esq
+RIGHT (OUTER) JOIN tabela_dir
+ON tabela_esq.coluna=tabela_dir.coluna
+WHERE tabela_esq.coluna IS NULL;
+
+# RIGHT JOIN - excluir correspondências Exemplo:
+
+SELECT * FROM tbl_Livros
+RIGHT JOIN tbl_Editoras
+ON tbl_Livros.IdEditora = tbl_Editoras.IdEditora
+WHERE tbl_Livros.IdEditora IS NULL;
+
+#CROSS JOIN Retorna um produto cartesiano entre as tabelas,
+# mostrando todas as combinações possíveis entre os registros.
+
+# Sintaxe: 
+SELECT colunas FROM tabela1
+CROSS JOIN tabela2;
+
+#CROSS JOIN - Exemplo 
+
+SELECT * FROM tbl_Livros
+CROSS JOIN tbl_livrosautores;
+
+# Unir registros de duas ou mais tabelas - operador UNION
+
+# Operador UNION Sintaxe:
+
+SELECT declaração1
+UNION [ALL]
+SELECT declaração2
+UNION [ALL]
+SELECT declaração3 ...
+[ORDER BY colunas];
+
+# Exemplo 01 - Resolução
+
+SELECT NomeLivro Livro, PrecoLivro Preço, 'Livro Caro' Resultado
+FROM tbl_Livros
+WHERE PrecoLivro >= 150.00
+UNION
+SELECT NomeLivro Livro, PrecoLivro Preço, 'Preço Razoável' Resultado
+FROM tbl_Livros
+WHERE PrecoLivro < 150.00
+ORDER BY Preço;
+
+# Exemplo 02 - Resolução
+
+SELECT L.NomeLivro Livro, L.PrecoLivro 'Preço Normal', L.PrecoLivro * 0.90
+'Preço Ajustado', A.Assunto
+FROM tbl_Livros L INNER JOIN tbl_Assuntos A
+ON L.IdAssunto = A.IdAssunto
+WHERE L.PrecoLivro > 200.00
+UNION
+SELECT L.NomeLivro Livro, L.PrecoLivro 'Preço Normal', L.PrecoLivro * 1.15
+'Preço Ajustado', A.Assunto
+FROM tbl_Livros L INNER JOIN tbl_Assuntos A
+ON L.IdAssunto = A.IdAssunto
+WHERE A.Assunto = 'Eletrônica'
+ORDER BY 'Preço Ajustado' DESC;
+
+# Exemplo 03 
+# Vamos simular um FULL OUTER JOIN (sem suporte em MySQL) usando UNION:
+
+SELECT * FROM tbl_Assuntos
+LEFT JOIN tbl_Livros
+ON tbl_Livros.IdAssunto = tbl_Assuntos.IdAssunto
+UNION
+SELECT * FROM tbl_Assuntos
+RIGHT JOIN tbl_Livros
+ON tbl_Livros.IdAssunto = tbl_Assuntos.IdAssunto;
+
+# Funções matemáticas e operadores aritméticos
+
